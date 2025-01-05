@@ -2,12 +2,15 @@ CC = gcc
 CFLAGS = -Wall -Wextra -std=c99
 
 SRC = spyglass_log.c example.c
-
 OBJ = $(SRC:.c=.o)
-
 TARGET = example
 
-all: $(TARGET)
+all: release
+
+debug: CFLAGS += -D DEBUG
+debug: $(TARGET)
+
+release: $(TARGET)
 
 $(TARGET): $(OBJ)
 	$(CC) $(OBJ) -o $(TARGET)
@@ -17,3 +20,5 @@ $(TARGET): $(OBJ)
 
 clean:
 	rm -f $(OBJ) $(TARGET)
+
+.PHONY: all debug release clean

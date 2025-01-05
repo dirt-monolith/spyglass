@@ -2,9 +2,9 @@
 
 int main()
 {
-    spyglass_log_print(SPYGLASS_LOG_INFO, "Starting program");
-    spyglass_log_print(SPYGLASS_LOG_WARNING, "This is a warning");
-    spyglass_log_print(SPYGLASS_LOG_ERROR, "Something went wrong!");
-    spyglass_log_print(5, NULL);
+    const int value = 42;
+    SPYGLASS_LOG_INFO("Program started with value %d", value);
+    SPYGLASS_LOG_WARN("This is a warning #%d", 1);
+    SPYGLASS_LOG_ERROR("Failed to process item %d: %s", value, "invalid input");
     return 0;
 }
