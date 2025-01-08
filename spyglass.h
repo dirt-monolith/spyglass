@@ -10,14 +10,29 @@
 #define SPYGLASS_LOG_COLOR_INFO  "\x1b[34m"
 #define SPYGLASS_LOG_COLOR_RESET "\x1b[0m"
 
-typedef enum {
-    SPYGLASS_LOG_ERROR,
-    SPYGLASS_LOG_WARNING,
-    SPYGLASS_LOG_INFO
+typedef enum 
+{
+    SPYGLASS_LOG_ERROR   = 1 << 0,
+    SPYGLASS_LOG_WARNING = 1 << 1,
+    SPYGLASS_LOG_INFO    = 1 << 2
 } spyglass_log_level;
 
-void spyglass_debug_init(int use_colors);
+typedef enum
+{
+    SPYGLASS_LOG_CFG_USE_COLOR = 1 << 0,
+    SPYGLASS_LOG_CFG_SHOW_TIME = 1 << 1,
+    SPYGLASS_LOG_CFG_SHOW_FILE = 1 << 2,
+    SPYGLASS_LOG_CFG_SHOW_FUNC = 1 << 3,
+    SPYGLASS_LOG_CFG_SHOW_LINE = 1 << 4,
+} spyglass_log_config_flags;
 
+typedef struct 
+{
+    unsigned int active_flags;
+    unsigned int active_levels;
+} spyglass_log_config;
+
+void spyglass_log_init(spyglass_log_config* config);
 void spyglass_log_print(spyglass_log_level level, const char* file, const char* func, int line, const char* format, ...);
 
 #ifdef DEBUG
