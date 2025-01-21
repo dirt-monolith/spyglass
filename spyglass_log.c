@@ -8,21 +8,19 @@ static int s_log_format_prefix(char* buffer, size_t buffer_size, const s_log_con
 {
     int offset = 0;
 
-    if (s_log_config_cur.active_flags & SPYGLASS_LOG_CFG_SHOW_TIME)
-    {
+    #if (SPYGLASS_CONFIG_FLAGS & SPYGLASS_LOG_CFG_SHOW_TIME_BIT)
         time_t now;
         struct tm* tm_info;
         time(&now);
         tm_info = localtime(&now);
         offset += strftime(buffer + offset, buffer_size - offset, "[%Y-%m-%d %H:%M:%S] ", tm_info);
-    }
+    #endif
 
     offset += snprintf(buffer + offset, buffer_size - offset, "%s ", level_cfg->level_str);
 
-    if (s_log_config_cur.active_flags & (SPYGLASS_LOG_CFG_SHOW_FILE | SPYGLASS_LOG_CFG_SHOW_FUNC | SPYGLASS_LOG_CFG_SHOW_LINE))
-    {
+    #if (SPYGLASS_CONFIG_FLAGS & (SPYGLASS_LOG_CFG_SHOW_FILE_BIT | SPYGLASS_LOG_CFG_SHOW_FUNC_BIT | SPYGLASS_LOG_CFG_SHOW_LINE_BIT))
         offset += s_log_add_source_location(buffer + offset, buffer_size - offset, file, func, line);
-    }
+    #endif
 
     return offset;
 }
@@ -31,46 +29,37 @@ static int s_log_add_source_location(char* buffer, size_t buffer_size, const cha
 {
     int offset = 0;
     offset += snprintf(buffer + offset, buffer_size - offset, "(");
+    const char* separator;
     
-    if (s_log_config_cur.active_flags & SPYGLASS_LOG_CFG_SHOW_FILE) 
-    {
+    #if (SPYGLASS_CONFIG_FLAGS & SPYGLASS_LOG_CFG_SHOW_FILE_BIT) 
         const char* filename = strrchr(file, '/');
         filename = filename ? filename + 1 : file;
         offset += snprintf(buffer + offset, buffer_size - offset, "%s", filename);
-    }
-    
-    if (s_log_config_cur.active_flags & SPYGLASS_LOG_CFG_SHOW_FUNC) 
-    {
-        const char* separator = (s_log_config_cur.active_flags & SPYGLASS_LOG_CFG_SHOW_FILE) ? ":" : "";
+    #endif
+
+    #if (SPYGLASS_CONFIG_FLAGS & SPYGLASS_LOG_CFG_SHOW_FUNC_BIT) 
+        separator = (SPYGLASS_CONFIG_FLAGS & SPYGLASS_LOG_CFG_SHOW_FILE_BIT) ? ":" : "";
         offset += snprintf(buffer + offset, buffer_size - offset, "%s%s", separator, func);
-    }
+    #endif
     
-    if (s_log_config_cur.active_flags & SPYGLASS_LOG_CFG_SHOW_LINE) 
-    {
-        const char* separator = (s_log_config_cur.active_flags & (SPYGLASS_LOG_CFG_SHOW_FUNC | SPYGLASS_LOG_CFG_SHOW_FILE)) ? ":" : "";
+    #if (SPYGLASS_CONFIG_FLAGS & SPYGLASS_LOG_CFG_SHOW_LINE_BIT) 
+        separator = (SPYGLASS_CONFIG_FLAGS & (SPYGLASS_LOG_CFG_SHOW_FUNC_BIT | SPYGLASS_LOG_CFG_SHOW_FILE_BIT)) ? ":" : "";
         offset += snprintf(buffer + offset, buffer_size - offset, "%s%d", separator, line);
-    }
+    #endif
     
     offset += snprintf(buffer + offset, buffer_size - offset, "): ");
     return offset;
 }
 
-void spyglass_log_init(spyglass_log_config* config)
-{
-    if (config) s_log_config_cur = *config;
-}
-
 void spyglass_log_print(spyglass_log_level level, const char* file, const char* func, int line, const char* format, ...) 
 {
-    if (!(s_log_config_cur.active_levels & level)) return;
-
     static const s_log_config_level log_levels[] = {
         [SPYGLASS_LOG_ERROR]   = {SPYGLASS_LOG_COLOR_ERROR, SPYGLASS_LOG_COLOR_RESET, "[ERROR]"},
         [SPYGLASS_LOG_WARNING] = {SPYGLASS_LOG_COLOR_WARN, SPYGLASS_LOG_COLOR_RESET, "[WARNING]"},
         [SPYGLASS_LOG_INFO]    = {SPYGLASS_LOG_COLOR_INFO, SPYGLASS_LOG_COLOR_RESET, "[INFO]"}
     };
 
-    const unsigned int use_colors = s_log_config_cur.active_flags & SPYGLASS_LOG_CFG_USE_COLOR;
+    const unsigned int use_colors = (SPYGLASS_CONFIG_FLAGS & SPYGLASS_LOG_CFG_USE_COLOR_BIT);
     const char* color = use_colors ? log_levels[level].color : "";
     const char* reset_color = use_colors ? log_levels[level].reset_color : "";
 
