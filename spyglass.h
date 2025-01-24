@@ -5,6 +5,10 @@
 #include <stdarg.h>
 #include <time.h>
 
+#ifndef SPYGLASS_LOG_DIR
+#define SPYGLASS_LOG_DIR ".log"
+#endif
+
 #define SPYGLASS_LOG_COLOR_ERROR "\x1b[31m"
 #define SPYGLASS_LOG_COLOR_WARN  "\x1b[33m"
 #define SPYGLASS_LOG_COLOR_INFO  "\x1b[34m"
