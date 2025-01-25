@@ -1,6 +1,6 @@
 #include "spyglass.h"
 
-void process_data(int value)
+void process_data(__attribute__((unused)) int value)
 {
     SPYGLASS_LOG_INFO("Processing data...");
     value = 0;

@@ -27,7 +27,7 @@ static int s_log_format_prefix(char* buffer, size_t buffer_size, const s_log_con
     return offset;
 }
 
-static int s_log_add_source_location(char* buffer, size_t buffer_size, const char* file, const char* func, int line)
+static int s_log_add_source_location(char* buffer, size_t buffer_size, __attribute__((unused)) const char* file, const char* func, int line)
 {
     int offset = 0;
     offset += snprintf(buffer + offset, buffer_size - offset, "(");
@@ -107,24 +107,31 @@ void spyglass_log_print(spyglass_log_level level, const char* file, const char* 
     char prefix_buffer[512];
     s_log_format_prefix(prefix_buffer, sizeof(prefix_buffer), &log_levels[level], file, func, line);
 
-    fprintf(stderr, "%s%s", color, prefix_buffer);
-    
+    #if SPYGLASS_CONFIG_FLAGS & SPYGLASS_LOG_CFG_USE_STDOUT_BIT
+        #define LOG_OUTPUT stdout
+    #else
+        #define LOG_OUTPUT stderr
+    #endif
+
+    fprintf(LOG_OUTPUT, "%s%s", color, prefix_buffer);
     va_list args;
     va_start(args, format);
-    vfprintf(stderr, format, args);
+    vfprintf(LOG_OUTPUT, format, args);
     va_end(args);
-    fprintf(stderr, "%s\n", reset_color);
+    fprintf(LOG_OUTPUT, "%s\n", reset_color);
 
-    if (!s_log_file) s_log_init_file();
-    if (s_log_file) {
-        va_list args2;
-        va_start(args2, format);
-        fprintf(s_log_file, "%s", prefix_buffer);
-        vfprintf(s_log_file, format, args2);
-        fprintf(s_log_file, "\n");
-        fflush(s_log_file);
-        va_end(args2);
-    }
+    #if (SPYGLASS_CONFIG_FLAGS & SPYGLASS_LOG_CFG_USE_FILE_BIT)
+        if (!s_log_file) s_log_init_file();
+        if (s_log_file) {
+            va_list args2;
+            va_start(args2, format);
+            fprintf(s_log_file, "%s", prefix_buffer);
+            vfprintf(s_log_file, format, args2);
+            fprintf(s_log_file, "\n");
+            fflush(s_log_file);
+            va_end(args2);
+        }
+    #endif
 }
 
 void s_log_cleanup(void) {
