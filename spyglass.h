@@ -6,7 +6,7 @@
 #include <time.h>
 
 #ifndef SPYGLASS_LOG_DIR
-#define SPYGLASS_LOG_DIR ".log"
+    #define SPYGLASS_LOG_DIR ".log"
 #endif
 
 #define SPYGLASS_LOG_COLOR_ERROR "\x1b[31m"
@@ -28,29 +28,29 @@
 #define SPYGLASS_LOG_CFG_USE_STDOUT_BIT (1 << 7)
 
 #ifndef SPYGLASS_CONFIG_FLAGS
-#define SPYGLASS_CONFIG_FLAGS (SPYGLASS_LOG_CFG_SHOW_TIME_BIT | SPYGLASS_LOG_CFG_SHOW_FILE_BIT | SPYGLASS_LOG_CFG_SHOW_FUNC_BIT | SPYGLASS_LOG_CFG_SHOW_LINE_BIT | SPYGLASS_LOG_CFG_USE_FILE_BIT | SPYGLASS_LOG_CFG_USE_STDERR_BIT)
+    #define SPYGLASS_CONFIG_FLAGS (SPYGLASS_LOG_CFG_SHOW_TIME_BIT | SPYGLASS_LOG_CFG_SHOW_FILE_BIT | SPYGLASS_LOG_CFG_SHOW_FUNC_BIT | SPYGLASS_LOG_CFG_SHOW_LINE_BIT | SPYGLASS_LOG_CFG_USE_FILE_BIT | SPYGLASS_LOG_CFG_USE_STDERR_BIT)
 #endif
 
 #ifndef SPYGLASS_CONFIG_LEVELS
-#define SPYGLASS_CONFIG_LEVELS (SPYGLASS_LOG_ERROR_BIT)
+    #define SPYGLASS_CONFIG_LEVELS (SPYGLASS_LOG_ERROR_BIT)
 #endif
 
 #if (SPYGLASS_CONFIG_LEVELS & SPYGLASS_LOG_ERROR_BIT)
-#define SPYGLASS_LOG_ERROR(fmt, ...) spyglass_log_print(SPYGLASS_LOG_ERROR, __FILE__, __func__, __LINE__, fmt, ##__VA_ARGS__)
+    #define SPYGLASS_LOG_ERROR(fmt, ...) spyglass_log_print(SPYGLASS_LOG_ERROR, __FILE__, __func__, __LINE__, fmt, ##__VA_ARGS__)
 #else 
-#define SPYGLASS_LOG_ERROR(fmt, ...) ((void)0)
+    #define SPYGLASS_LOG_ERROR(fmt, ...) ((void)0)
 #endif
 
 #if (SPYGLASS_CONFIG_LEVELS & SPYGLASS_LOG_WARNING_BIT)
-#define SPYGLASS_LOG_WARN(fmt, ...) spyglass_log_print(SPYGLASS_LOG_WARNING, __FILE__, __func__, __LINE__, fmt, ##__VA_ARGS__)
+    #define SPYGLASS_LOG_WARN(fmt, ...) spyglass_log_print(SPYGLASS_LOG_WARNING, __FILE__, __func__, __LINE__, fmt, ##__VA_ARGS__)
 #else
-#define SPYGLASS_LOG_WARN(fmt, ...) ((void)0)
+    #define SPYGLASS_LOG_WARN(fmt, ...) ((void)0)
 #endif
 
 #if (SPYGLASS_CONFIG_LEVELS & SPYGLASS_LOG_INFO_BIT)
-#define SPYGLASS_LOG_INFO(fmt, ...) spyglass_log_print(SPYGLASS_LOG_INFO, __FILE__, __func__, __LINE__, fmt, ##__VA_ARGS__)
+    #define SPYGLASS_LOG_INFO(fmt, ...) spyglass_log_print(SPYGLASS_LOG_INFO, __FILE__, __func__, __LINE__, fmt, ##__VA_ARGS__)
 #else
-#define SPYGLASS_LOG_INFO(fmt, ...) ((void)0)
+    #define SPYGLASS_LOG_INFO(fmt, ...) ((void)0)
 #endif
 
 typedef enum 

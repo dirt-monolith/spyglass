@@ -107,18 +107,12 @@ void spyglass_log_print(spyglass_log_level level, const char* file, const char* 
     char prefix_buffer[512];
     s_log_format_prefix(prefix_buffer, sizeof(prefix_buffer), &log_levels[level], file, func, line);
 
-    #if SPYGLASS_CONFIG_FLAGS & SPYGLASS_LOG_CFG_USE_STDOUT_BIT
-        #define LOG_OUTPUT stdout
-    #else
-        #define LOG_OUTPUT stderr
-    #endif
-
-    fprintf(LOG_OUTPUT, "%s%s", color, prefix_buffer);
+    fprintf(SPYGLASS_LOG_OUTPUT, "%s%s", color, prefix_buffer);
     va_list args;
     va_start(args, format);
-    vfprintf(LOG_OUTPUT, format, args);
+    vfprintf(SPYGLASS_LOG_OUTPUT, format, args);
     va_end(args);
-    fprintf(LOG_OUTPUT, "%s\n", reset_color);
+    fprintf(SPYGLASS_LOG_OUTPUT, "%s\n", reset_color);
 
     #if (SPYGLASS_CONFIG_FLAGS & SPYGLASS_LOG_CFG_USE_FILE_BIT)
         if (!s_log_file) s_log_init_file();

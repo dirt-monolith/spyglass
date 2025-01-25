@@ -39,6 +39,11 @@
     static void __attribute__((destructor)) s_log_cleanup(void);
 #endif
 
+#if SPYGLASS_CONFIG_FLAGS & SPYGLASS_LOG_CFG_USE_STDOUT_BIT
+    #define SPYGLASS_LOG_OUTPUT stdout
+#else
+    #define SPYGLASS_LOG_OUTPUT stderr
+#endif
 
 typedef struct 
 {
