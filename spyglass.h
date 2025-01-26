@@ -35,22 +35,53 @@
     #define SPYGLASS_CONFIG_OBSERVATIONS (SPYGLASS_MAYDAY)
 #endif
 
-#if (SPYGLASS_CONFIG_OBSERVATIONS & SPYGLASS_MAYDAY)
-    #define MAYDAY(fmt, ...) spyglass_log(SpyglassMayday, __FILE__, __func__, __LINE__, fmt, ##__VA_ARGS__)
-#else 
-    #define MAYDAY(fmt, ...) ((void)0)
+#ifndef SPYGLASS_USE_DEPLOY
+    #define SPYGLASS_USE_DEPLOY 0
 #endif
 
-#if (SPYGLASS_CONFIG_OBSERVATIONS & SPYGLASS_SIGHT)
-    #define SIGHTING(fmt, ...) spyglass_log(SpyglassSighting, __FILE__, __func__, __LINE__, fmt, ##__VA_ARGS__)
-#else
-    #define SIGHTING(fmt, ...) ((void)0)
-#endif
+#if SPYGLASS_USE_DEPLOY
+    static int _spyglass_deployed = 0;
+    static inline void spyglass_deploy(void) { _spyglass_deployed++; }
+    static inline void spyglass_stow(void) { if (_spyglass_deployed > 0) _spyglass_deployed--; }
 
-#if (SPYGLASS_CONFIG_OBSERVATIONS & SPYGLASS_MARK)
-    #define MARK(fmt, ...) spyglass_log(SpyglassMark, __FILE__, __func__, __LINE__, fmt, ##__VA_ARGS__)
+    #if (SPYGLASS_CONFIG_OBSERVATIONS & SPYGLASS_MAYDAY)
+        #define MAYDAY(fmt, ...) (_spyglass_deployed ? spyglass_log(SpyglassMayday, __FILE__, __func__, __LINE__, fmt, ##__VA_ARGS__) : (void)0)
+    #else
+        #define MAYDAY(fmt, ...) ((void)0)
+    #endif
+
+    #if (SPYGLASS_CONFIG_OBSERVATIONS & SPYGLASS_SIGHT)
+        #define SIGHTING(fmt, ...) (_spyglass_deployed ? spyglass_log(SpyglassSighting, __FILE__, __func__, __LINE__, fmt, ##__VA_ARGS__) : (void)0)
+    #else
+        #define SIGHTING(fmt, ...) ((void)0)
+    #endif
+
+    #if (SPYGLASS_CONFIG_OBSERVATIONS & SPYGLASS_MARK)
+        #define MARK(fmt, ...) (_spyglass_deployed ? spyglass_log(SpyglassMark, __FILE__, __func__, __LINE__, fmt, ##__VA_ARGS__) : (void)0)
+    #else
+        #define MARK(fmt, ...) ((void)0)
+    #endif
 #else
-    #define MARK(fmt, ...) ((void)0)
+    #define spyglass_deploy() ((void)0)
+    #define spyglass_stow() ((void)0)
+
+    #if (SPYGLASS_CONFIG_OBSERVATIONS & SPYGLASS_MAYDAY)
+        #define MAYDAY(fmt, ...) spyglass_log(SpyglassMayday, __FILE__, __func__, __LINE__, fmt, ##__VA_ARGS__)
+    #else
+        #define MAYDAY(fmt, ...) ((void)0)
+    #endif
+
+    #if (SPYGLASS_CONFIG_OBSERVATIONS & SPYGLASS_SIGHT)
+        #define SIGHTING(fmt, ...) spyglass_log(SpyglassSighting, __FILE__, __func__, __LINE__, fmt, ##__VA_ARGS__)
+    #else
+        #define SIGHTING(fmt, ...) ((void)0)
+    #endif
+
+    #if (SPYGLASS_CONFIG_OBSERVATIONS & SPYGLASS_MARK)
+        #define MARK(fmt, ...) spyglass_log(SpyglassMark, __FILE__, __func__, __LINE__, fmt, ##__VA_ARGS__)
+    #else
+        #define MARK(fmt, ...) ((void)0)
+    #endif
 #endif
 
 typedef enum 

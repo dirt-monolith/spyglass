@@ -11,7 +11,11 @@ int main()
 {
     const int value = 42;
     MARK("Program started with value: %d", value);
+
+    spyglass_deploy();
     process_data(value);
     MAYDAY("Failed to process item: %d: %s", value, "invalid input");
+    spyglass_stow();
+
     return 0;
 }
