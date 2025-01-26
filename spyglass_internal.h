@@ -49,14 +49,14 @@ typedef struct
 {
     const char* color;
     const char* reset_color;
-    const char* level_str;
-} s_log_config_level;
+    const char* spot_str;
+} s_config_spot;
 
 static FILE* s_log_file = NULL;
 
-static int s_log_format_prefix(char* buffer, size_t buffer_size, const s_log_config_level* level_cfg, const char* file, const char* func, int line);
-static int s_log_add_source_location(char* buffer, size_t buffer_size, const char* file, const char* func, int line);
-static void s_log_init_file();
-static int s_log_ensure_log_directory();
+static int s_format_prefix(char* buffer, size_t buffer_size, const s_config_spot* cfg_spot, const char* file, const char* func, int line);
+static int s_add_source_location(char* buffer, size_t buffer_size, const char* file, const char* func, int line);
+static void s_init_file();
+static int s_ensure_log_directory();
 
-#endif
+#endif /* ----- SPYGLASS_INTERNAL_H -----*/

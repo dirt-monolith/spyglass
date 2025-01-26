@@ -6,7 +6,7 @@
 #include <sys/stat.h>
 #include <errno.h>
 
-static int s_log_format_prefix(char* buffer, size_t buffer_size, const s_log_config_level* level_cfg, const char* file, const char* func, int line)
+static int s_format_prefix(char* buffer, size_t buffer_size, const s_config_spot* cfg_spot, const char* file, const char* func, int line)
 {
     int offset = 0;
 
@@ -18,16 +18,16 @@ static int s_log_format_prefix(char* buffer, size_t buffer_size, const s_log_con
         offset += strftime(buffer + offset, buffer_size - offset, "[%Y-%m-%d %H:%M:%S] ", tm_info);
     #endif
 
-    offset += snprintf(buffer + offset, buffer_size - offset, "%s ", level_cfg->level_str);
+    offset += snprintf(buffer + offset, buffer_size - offset, "%s ", cfg_spot->spot_str);
 
     #if (SPYGLASS_CONFIG_LENS & (SPYGLASS_LENS_FILE | SPYGLASS_LENS_FUNC | SPYGLASS_LENS_LINE))
-        offset += s_log_add_source_location(buffer + offset, buffer_size - offset, file, func, line);
+        offset += s_add_source_location(buffer + offset, buffer_size - offset, file, func, line);
     #endif
 
     return offset;
 }
 
-static int s_log_add_source_location(char* buffer, size_t buffer_size, __attribute__((unused)) const char* file, const char* func, int line)
+static int s_add_source_location(char* buffer, size_t buffer_size, __attribute__((unused)) const char* file, const char* func, int line)
 {
     int offset = 0;
     offset += snprintf(buffer + offset, buffer_size - offset, "(");
@@ -53,7 +53,7 @@ static int s_log_add_source_location(char* buffer, size_t buffer_size, __attribu
     return offset;
 }
 
-static int s_log_ensure_log_directory() {
+static int s_ensure_log_directory() {
     struct stat st = {0};
     if (stat(SPYGLASS_AIM, &st) == -1) {
         #ifdef _WIN32
@@ -65,11 +65,11 @@ static int s_log_ensure_log_directory() {
     return 0;
 }
 
-static void s_log_init_file()
+static void s_init_file()
 {
     if (s_log_file) return;
     
-    if (s_log_ensure_log_directory() != 0) {
+    if (s_ensure_log_directory() != 0) {
         fprintf(stderr, "Failed to create log directory: %s\n", strerror(errno));
         return;
     }
@@ -92,22 +92,22 @@ static void s_log_init_file()
     }
 }
 
-void spyglass_log(spyglass_observation level, const char* file, const char* func, int line, const char* format, ...) 
+void spyglass_log(spyglass_spot spot, const char* file, const char* func, int line, const char* format, ...) 
 {
-    static const s_log_config_level log_levels[] = {
-        [SpyglassMayday]    = {SPYGLASS_LENS_TINT_MAYDAY, SPYGLASS_LENS_TINT_DEFAULT, "[MAYDAY]" },
-        [SpyglassSighting]  = {SPYGLASS_LENS_TINT_SIGHT, SPYGLASS_LENS_TINT_DEFAULT, "[SIGHTING]" },
-        [SpyglassMark]      = {SPYGLASS_LENS_TINT_MARK, SPYGLASS_LENS_TINT_DEFAULT, "[MARK]" },
-        [SpyglassDeploy]    = {SPYGLASS_LENS_TINT_DEFAULT, SPYGLASS_LENS_TINT_DEFAULT, "[SPYGLASS DEPLOYED]" },
-        [SpyglassStow]      = {SPYGLASS_LENS_TINT_DEFAULT, SPYGLASS_LENS_TINT_DEFAULT, "[SPYGLASS STOWED]" }
+    static const s_config_spot cfg_spots[] = {
+        [SpyglassMayday  ] = {SPYGLASS_LENS_TINT_MAYDAY , SPYGLASS_LENS_TINT_DEFAULT, "[MAYDAY]"            },
+        [SpyglassSighting] = {SPYGLASS_LENS_TINT_SIGHT  , SPYGLASS_LENS_TINT_DEFAULT, "[SIGHTING]"          },
+        [SpyglassMark    ] = {SPYGLASS_LENS_TINT_MARK   , SPYGLASS_LENS_TINT_DEFAULT, "[MARK]"              },
+        [SpyglassDeploy  ] = {SPYGLASS_LENS_TINT_DEFAULT, SPYGLASS_LENS_TINT_DEFAULT, "[SPYGLASS DEPLOYED]" },
+        [SpyglassStow    ] = {SPYGLASS_LENS_TINT_DEFAULT, SPYGLASS_LENS_TINT_DEFAULT, "[SPYGLASS STOWED]"   }
     };
 
     const unsigned int use_colors = (SPYGLASS_CONFIG_LENS & SPYGLASS_LENS_COLOR);
-    const char* color = use_colors ? log_levels[level].color : "";
-    const char* reset_color = use_colors ? log_levels[level].reset_color : "";
+    const char* color = use_colors ? cfg_spots[spot].color : "";
+    const char* reset_color = use_colors ? cfg_spots[spot].reset_color : "";
 
     char prefix_buffer[512];
-    s_log_format_prefix(prefix_buffer, sizeof(prefix_buffer), &log_levels[level], file, func, line);
+    s_format_prefix(prefix_buffer, sizeof(prefix_buffer), &cfg_spots[spot], file, func, line);
 
     fprintf(LOG_OUTPUT, "%s%s", color, prefix_buffer);
     va_list args;
@@ -117,7 +117,7 @@ void spyglass_log(spyglass_observation level, const char* file, const char* func
     fprintf(LOG_OUTPUT, "%s\n", reset_color);
 
     #if (SPYGLASS_CONFIG_LENS & SPYGLASS_LENS_AIM)
-        if (!s_log_file) s_log_init_file();
+        if (!s_log_file) s_init_file();
         if (s_log_file) {
             va_list args2;
             va_start(args2, format);
