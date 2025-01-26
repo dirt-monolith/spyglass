@@ -97,7 +97,9 @@ void spyglass_log(spyglass_observation level, const char* file, const char* func
     static const s_log_config_level log_levels[] = {
         [SpyglassMayday]    = {SPYGLASS_LENS_TINT_MAYDAY, SPYGLASS_LENS_TINT_DEFAULT, "[MAYDAY]" },
         [SpyglassSighting]  = {SPYGLASS_LENS_TINT_SIGHT, SPYGLASS_LENS_TINT_DEFAULT, "[SIGHTING]" },
-        [SpyglassMark]      = {SPYGLASS_LENS_TINT_MARK, SPYGLASS_LENS_TINT_DEFAULT, "[MARK]" }
+        [SpyglassMark]      = {SPYGLASS_LENS_TINT_MARK, SPYGLASS_LENS_TINT_DEFAULT, "[MARK]" },
+        [SpyglassDeploy]    = {SPYGLASS_LENS_TINT_DEFAULT, SPYGLASS_LENS_TINT_DEFAULT, "[SPYGLASS DEPLOYED]" },
+        [SpyglassStow]      = {SPYGLASS_LENS_TINT_DEFAULT, SPYGLASS_LENS_TINT_DEFAULT, "[SPYGLASS STOWED]" }
     };
 
     const unsigned int use_colors = (SPYGLASS_CONFIG_LENS & SPYGLASS_LENS_COLOR);

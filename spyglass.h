@@ -39,10 +39,35 @@
     #define SPYGLASS_USE_DEPLOY 0
 #endif
 
+typedef enum 
+{
+    SpyglassMayday   = SPYGLASS_MAYDAY,
+    SpyglassSighting = SPYGLASS_SIGHT,
+    SpyglassMark     = SPYGLASS_MARK,
+    SpyglassDeploy   = (1 << 3),
+    SpyglassStow     = (1 << 4)
+} spyglass_observation;
+
+void spyglass_log(spyglass_observation level, const char* file, const char* func, int line, const char* format, ...);
+
 #if SPYGLASS_USE_DEPLOY
     static int _spyglass_deployed = 0;
-    static inline void spyglass_deploy(void) { _spyglass_deployed++; }
-    static inline void spyglass_stow(void) { if (_spyglass_deployed > 0) _spyglass_deployed--; }
+    static inline void spyglass_deploy(void) 
+    { 
+        _spyglass_deployed++; 
+        if (_spyglass_deployed == 1) 
+        {
+            spyglass_log(SpyglassDeploy, __FILE__, __func__, __LINE__, "");
+        }
+    }
+    static inline void spyglass_stow(void) 
+    { 
+        if (_spyglass_deployed > 0) _spyglass_deployed--;
+        if (_spyglass_deployed == 0)
+        {
+            spyglass_log(SpyglassStow, __FILE__, __func__, __LINE__, "\n");
+        }
+    }
 
     #if (SPYGLASS_CONFIG_OBSERVATIONS & SPYGLASS_MAYDAY)
         #define MAYDAY(fmt, ...) (_spyglass_deployed ? spyglass_log(SpyglassMayday, __FILE__, __func__, __LINE__, fmt, ##__VA_ARGS__) : (void)0)
@@ -82,15 +107,5 @@
     #else
         #define MARK(fmt, ...) ((void)0)
     #endif
-#endif
-
-typedef enum 
-{
-    SpyglassMayday   = SPYGLASS_MAYDAY,
-    SpyglassSighting = SPYGLASS_SIGHT,
-    SpyglassMark     = SPYGLASS_MARK
-} spyglass_observation;
-
-void spyglass_log(spyglass_observation level, const char* file, const char* func, int line, const char* format, ...);
-
-#endif
+#endif // ----- SPYGLASS_USE_DEPLOY -----
+#endif // ----- SPYGLASS_H -----
