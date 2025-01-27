@@ -6,7 +6,7 @@
 #include <time.h>
 
 #ifndef SPYGLASS_AIM
-    #define SPYGLASS_AIM ".log"
+    #define SPYGLASS_AIM "[stderr, \".log/log.spyglass\"]"
 #endif
 
 #define SPYGLASS_LENS_TINT_MAYDAY  "\x1b[31m"

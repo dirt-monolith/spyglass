@@ -52,11 +52,17 @@ typedef struct
     const char* spot_str;
 } s_config_spot;
 
-static FILE* s_log_file = NULL;
+static size_t s_output_count = 0;
+static FILE* s_log_files[8];
+static int s_is_std[8];
+static int s_initialized = 0;
 
 static int s_format_prefix(char* buffer, size_t buffer_size, const s_config_spot* cfg_spot, const char* file, const char* func, int line);
 static int s_add_source_location(char* buffer, size_t buffer_size, const char* file, const char* func, int line);
-static void s_init_file();
-static int s_ensure_log_directory();
+static int s_ensure_directory(const char* dir);
+static char** s_parse_paths_string(const char* macro_str, int* count);
+static char* s_dirname(char* path);
+static char* s_remove_filename_from_path(const char* path);
+static char* string_dup(const char* str);
 
 #endif /* ----- SPYGLASS_INTERNAL_H -----*/
