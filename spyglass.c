@@ -313,27 +313,25 @@ void spyglass_log(spyglass_spot spot, const char* file, const char* func, int li
     char prefix_buffer[512];
     s_format_prefix(prefix_buffer, sizeof(prefix_buffer), &cfg_spots[spot], file, func, line);
 
-    #if (SPYGLASS_CONFIG_LENS & SPYGLASS_LENS_AIM)
-        if (!s_initialized) 
-        {
-            s_init_outputs();
-            s_initialized = 1;
-        }
+    if (!s_initialized) 
+    {
+        s_init_outputs();
+        s_initialized = 1;
+    }
 
-        for (size_t i = 0; i < s_output_count; i++) 
-        {
-            if (!s_log_files[i]) continue;
-            
-            fprintf(s_log_files[i], "%s%s", s_is_std[i] ? color : "", prefix_buffer);
-            va_list args;
-            va_start(args, format);
-            vfprintf(s_log_files[i], format, args);
-            va_end(args);
-            fprintf(s_log_files[i], "%s\n", s_is_std[i] ? reset_color : "");
+    for (size_t i = 0; i < s_output_count; i++) 
+    {
+        if (!s_log_files[i]) continue;
         
-            if (!s_is_std[i]) fflush(s_log_files[i]);
-        }
-    #endif
+        fprintf(s_log_files[i], "%s%s", s_is_std[i] ? color : "", prefix_buffer);
+        va_list args;
+        va_start(args, format);
+        vfprintf(s_log_files[i], format, args);
+        va_end(args);
+        fprintf(s_log_files[i], "%s\n", s_is_std[i] ? reset_color : "");
+    
+        if (!s_is_std[i]) fflush(s_log_files[i]);
+    }
 }
 
 void s_log_cleanup(void) {

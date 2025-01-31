@@ -39,12 +39,6 @@
     static void __attribute__((destructor)) s_log_cleanup(void);
 #endif
 
-#if SPYGLASS_CONFIG_LENS & SPYGLASS_LENS_AIM_STDOUT
-    #define LOG_OUTPUT stdout
-#else
-    #define LOG_OUTPUT stderr
-#endif
-
 typedef struct 
 {
     const char* color;
