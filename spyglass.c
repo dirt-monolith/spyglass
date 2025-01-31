@@ -149,7 +149,7 @@ static int s_ensure_directory(const char* path)
 }
 
 // TODO(01.27.2025|jared): Eventually package this in it's own library for use in files and paths
-// @paths_str should take the format: "[<output>, \"<dir>/<filename>\", \"<dir>/<dir>/<filename>\", ...]" Example: "[stderr, \".log/log.spyglass\"]" 
+// @paths_str should take the format: "[<output>, <dir>/<filename>, <dir>/<dir>/<filename>, ...]" Example: "[stderr, .log/log.spyglass]" 
 static char** s_parse_paths_string(const char* paths_str, int* count) 
 {
     size_t len = strlen(paths_str);
@@ -261,6 +261,54 @@ static char* s_remove_filename_from_path(const char* path)
     return dir_path;
 }
 
+// TODO(01.27.2025|jared): Eventually package this in it's own library for use in files and paths
+static char* s_get_filename_from_path(const char* path)
+{
+    if (path == NULL) return NULL;
+
+    // Find the last occurrence of '/'
+    const char* last_slash = NULL;
+    const char* current = path;
+    
+    while (*current != '\0') {
+        if (*current == '/') {
+            last_slash = current;
+        }
+        current++;
+    }
+
+    // If no slash found, return copy of entire path as it's just a filename
+    if (last_slash == NULL) {
+        return string_dup(path);
+    }
+
+    // Move past the slash to get just the filename
+    last_slash++;
+    
+    // Check if there's actually a filename after the last slash
+    if (*last_slash == '\0') {
+        return string_dup("");
+    }
+
+    return string_dup(last_slash);
+}
+
+// TODO(01.27.2025|jared): Eventually package this in it's own library for use with dates
+// Helper function to get quarter number (1-4)
+__attribute__((unused)) static int s_get_quarter(int month) {
+    return ((month - 1) / 3) + 1;
+}
+
+// TODO(01.27.2025|jared): Eventually package this in it's own library for use with dates
+// Helper function to get week number (1-53)
+__attribute__((unused)) static int s_get_week_number(const struct tm* t) {
+    // Using ISO week number calculation
+    int days_since_jan1 = t->tm_yday;
+    int wday_of_jan1 = (t->tm_wday + 7 - t->tm_yday % 7) % 7;
+    int week = (days_since_jan1 + wday_of_jan1) / 7;
+    return week + 1;
+}
+
 static void s_parse_output_list(void) 
 {
     int count;
@@ -281,7 +329,48 @@ static void s_parse_output_list(void)
             continue;
         }
         s_ensure_directory(s_remove_filename_from_path(parsed_strings[i]));
-        s_log_files[s_output_count] = fopen(parsed_strings[i], "a");
+
+        // NOTE(01.31.2025|jared): Prefix filename with YYYYMMDD_ so every day a new file is written to
+        time_t now = time(NULL);
+        struct tm *t = localtime(&now);
+        char dated_filename_path[256]; 
+        #if SPYGLASS_LOG_FREQ == SPYGLASS_LOG_FREQ_HOURLY
+            snprintf(dated_filename_path, sizeof(dated_filename_path), 
+                "%s/%04d%02d%02dh%02d_%s", 
+                s_remove_filename_from_path(parsed_strings[i]),
+                t->tm_year + 1900, t->tm_mon + 1, t->tm_mday, t->tm_hour,
+                s_get_filename_from_path(parsed_strings[i]));
+
+        #elif SPYGLASS_LOG_FREQ == SPYGLASS_LOG_FREQ_DAILY
+            snprintf(dated_filename_path, sizeof(dated_filename_path), 
+                    "%s/%04d%02d%02d_%s", 
+                    s_remove_filename_from_path(parsed_strings[i]),
+                    t->tm_year + 1900, t->tm_mon + 1, t->tm_mday,
+                    s_get_filename_from_path(parsed_strings[i]));
+
+        #elif SPYGLASS_LOG_FREQ == SPYGLASS_LOG_FREQ_WEEKLY
+            snprintf(dated_filename_path, sizeof(dated_filename_path), 
+                    "%s/%04dw%02d_%s", 
+                    s_remove_filename_from_path(parsed_strings[i]),
+                    t->tm_year + 1900, s_get_week_number(t),
+                    s_get_filename_from_path(parsed_strings[i]));
+
+        #elif SPYGLASS_LOG_FREQ == SPYGLASS_LOG_FREQ_MONTHLY
+            snprintf(dated_filename_path, sizeof(dated_filename_path), 
+                    "%s/%04d%02d_%s", 
+                    s_remove_filename_from_path(parsed_strings[i]),
+                    t->tm_year + 1900, t->tm_mon + 1,
+                    s_get_filename_from_path(parsed_strings[i]));
+
+        #elif SPYGLASS_LOG_FREQ == SPYGLASS_LOG_FREQ_QUARTERLY
+            snprintf(dated_filename_path, sizeof(dated_filename_path), 
+                    "%s/%04dq%d_%s", 
+                    s_remove_filename_from_path(parsed_strings[i]),
+                    t->tm_year + 1900, s_get_quarter(t->tm_mon + 1),
+                    s_get_filename_from_path(parsed_strings[i]));
+        #endif
+
+        s_log_files[s_output_count] = fopen(dated_filename_path, "a");
         s_is_std[s_output_count++] = 0;
     }
 

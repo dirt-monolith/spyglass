@@ -6,7 +6,17 @@
 #include <time.h>
 
 #ifndef SPYGLASS_AIM
-    #define SPYGLASS_AIM "[stderr, \".log/log.spyglass\"]"
+    #define SPYGLASS_AIM "[stderr, .log/log.spyglass]"
+#endif
+
+#define SPYGLASS_LOG_FREQ_HOURLY    0
+#define SPYGLASS_LOG_FREQ_DAILY     1
+#define SPYGLASS_LOG_FREQ_WEEKLY    2
+#define SPYGLASS_LOG_FREQ_MONTHLY   3
+#define SPYGLASS_LOG_FREQ_QUARTERLY 4
+
+#ifndef SPYGLASS_LOG_FREQ
+    #define SPYGLASS_LOG_FREQ SPYGLASS_LOG_FREQ_MONTHLY
 #endif
 
 #define SPYGLASS_LENS_TINT_MAYDAY  "\x1b[31m"
@@ -18,11 +28,11 @@
 #define SPYGLASS_SIGHT  (1 << 1)
 #define SPYGLASS_MARK   (1 << 2)
 
-#define SPYGLASS_LENS_COLOR      (1 << 0)
-#define SPYGLASS_LENS_TIME       (1 << 1)
-#define SPYGLASS_LENS_FILE       (1 << 2)
-#define SPYGLASS_LENS_FUNC       (1 << 3)
-#define SPYGLASS_LENS_LINE       (1 << 4)
+#define SPYGLASS_LENS_COLOR (1 << 0)
+#define SPYGLASS_LENS_TIME  (1 << 1)
+#define SPYGLASS_LENS_FILE  (1 << 2)
+#define SPYGLASS_LENS_FUNC  (1 << 3)
+#define SPYGLASS_LENS_LINE  (1 << 4)
 
 #ifndef SPYGLASS_CONFIG_LENS
     #define SPYGLASS_CONFIG_LENS (SPYGLASS_LENS_TIME | SPYGLASS_LENS_FILE | SPYGLASS_LENS_FUNC | SPYGLASS_LENS_LINE)

@@ -57,6 +57,7 @@ static int s_ensure_directory(const char* dir);
 static char** s_parse_paths_string(const char* macro_str, int* count);
 static char* s_dirname(char* path);
 static char* s_remove_filename_from_path(const char* path);
+static char* s_get_filename_from_path(const char* path);
 static char* string_dup(const char* str);
 
 #endif /* ----- SPYGLASS_INTERNAL_H -----*/
