@@ -1,3 +1,8 @@
+# Ignore all files without extensions
+*
+!*/
+!*.*
+
 # Prerequisites
 *.d
 
@@ -50,3 +55,9 @@ modules.order
 Module.symvers
 Mkfile.old
 dkms.conf
+
+# IDE files
+.vscode/*
+
+# LOG files
+.log/*

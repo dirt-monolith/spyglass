@@ -1,0 +1,51 @@
+CC = gcc
+CFLAGS = -Wall -Wextra -std=c99
+
+SRC = spyglass.c example.c
+OBJ = $(SRC:.c=.o)
+TARGET = example
+
+SPYGLASS_AIM = "[stderr, \".log/log.spyglass\"]"
+
+DEBUG_SPOTTING = "(SPYGLASS_MAYDAY|SPYGLASS_SIGHT|SPYGLASS_MARK)"
+DEBUG_LENS = "(SPYGLASS_LENS_COLOR \
+				|SPYGLASS_LENS_TIME \
+				|SPYGLASS_LENS_FILE \
+				|SPYGLASS_LENS_FUNC \
+				|SPYGLASS_LENS_LINE)"
+
+TEST_SPOTTING = "(SPYGLASS_MAYDAY|SPYGLASS_SIGHT)"
+TEST_LENS = "(SPYGLASS_LENS_TIME \
+				|SPYGLASS_LENS_FILE \
+				|SPYGLASS_LENS_FUNC \
+				|SPYGLASS_LENS_LINE)"
+
+debug: CFLAGS += -D SPYGLASS_CONFIG_LENS=$(DEBUG_LENS) \
+				 -D SPYGLASS_CONFIG_SPOT=$(DEBUG_SPOTTING)
+test: CFLAGS += -D SPYGLASS_CONFIG_LENS=$(TEST_LENS) \
+				-D SPYGLASS_CONFIG_SPOT=$(TEST_SPOTTING)
+
+debug-scoped: CFLAGS += -D SPYGLASS_CONFIG_LENS=$(DEBUG_LENS) \
+						-D SPYGLASS_CONFIG_SPOT=$(DEBUG_SPOTTING) \
+						-D SPYGLASS_USE_DEPLOY				
+test-scoped: CFLAGS += -D SPYGLASS_CONFIG_LENS=$(TEST_LENS) \
+						-D SPYGLASS_CONFIG_SPOT=$(TEST_SPOTTING) \
+						-D SPYGLASS_USE_DEPLOY
+
+all: release
+debug: $(TARGET)
+debug-scoped: $(TARGET)
+test: $(TARGET)
+test-scoped: $(TARGET)
+release: $(TARGET)
+
+$(TARGET): $(OBJ)
+	$(CC) $(OBJ) -o $(TARGET)
+
+%.o: %.c
+	$(CC) $(CFLAGS) -c $< -o $@
+
+clean:
+	rm -f $(OBJ) $(TARGET)
+
+.PHONY: all debug debug-scoped test test-scoped release clean
